@@ -1,6 +1,6 @@
 # COMment INTelligence Solution
 
-AI-Enabled Public Comment Intelligence Solutions
+AI-Enabled Public Comment Intelligence Solution
 
 # Overview
 

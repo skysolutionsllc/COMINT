@@ -89,13 +89,19 @@ The interface is designed to support both detailed analyst workflows and high-le
 
 # Access Information
 ServiceNow Instance
+
 Instance URL: <INSERT_INSTANCE_URL>
+
 Username: <INSERT_USERNAME>
+
 Password: <INSERT_PASSWORD>
 
 n8n Orchestration Environment
+
 URL: <INSERT_N8N_URL>
+
 Username: <INSERT_USERNAME>
+
 Password: <INSERT_PASSWORD>
 
 n8n is responsible for ingestion, transformation, and pipeline orchestration. All data flows originate here before entering the analytical layer.

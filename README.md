@@ -81,20 +81,18 @@ Users can:
 
 Drill down to individual comments and view full text
 Navigate across rules, themes, and impact scores
-Filter by time windows or campaign activity
 Analyze sentiment and substantiveness distributions
-Identify high-impact arguments and outliers
 
 The interface is designed to support both detailed analyst workflows and high-level executive review. It is also configurable to meet the needs of different agencies or programs.
 
 # Access Information
 ServiceNow Instance
 
-Instance URL: <INSERT_INSTANCE_URL>
+Instance URL: https://skysolutionsllcdemo3.service-now.com/x/sks/Sky-Assure-COMINT/home
 
-Username: <INSERT_USERNAME>
+Username: Regulationcomments
 
-Password: <INSERT_PASSWORD>
+Password: dQ}GPMjgq5UFWTdmxQ4{U8KRB2;C)C]
 
 n8n Orchestration Environment
 

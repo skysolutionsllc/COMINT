@@ -2,7 +2,7 @@
 
 AI-Enabled Public Comment Intelligence & Substantiveness Platform
 
-Overview
+# Overview
 
 COMINT is designed to address a very specific and persistent challenge in federal rulemaking: making sense of large-scale public comment data in a way that is structured, defensible, and usable.
 

@@ -93,13 +93,3 @@ Instance URL: https://skysolutionsllcdemo3.service-now.com/x/sks/Sky-Assure-COMI
 Username: Regulationcomments
 
 Password: dQ}GPMjgq5UFWTdmxQ4{U8KRB2;C)C]
-
-n8n Orchestration Environment
-
-URL: 
-
-Username: 
-
-Password: 
-
-n8n is responsible for ingestion, transformation, and pipeline orchestration. All data flows originate here before entering the analytical layer.

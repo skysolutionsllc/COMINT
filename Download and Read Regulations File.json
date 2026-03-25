@@ -1,0 +1,2352 @@
+{
+  "name": "Download and Read Regulations File",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://api.regulations.gov/v4/comments",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "filter[commentOnId]",
+              "value": "={{ $('Get Docket Details1').item.json.data.attributes.objectId }}"
+            },
+            {
+              "name": "api_key",
+              "value": "=laoV9AqkfgctjBUb9LLY9rzVN2vEZV4LadnnLKdE"
+            },
+            {
+              "name": "page[size]",
+              "value": "=250"
+            },
+            {
+              "name": "include",
+              "value": "attachments"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {
+                    "name": "page[number]",
+                    "value": "={{ $pageCount + 1 }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ !$response.body.meta.hasNextPage }} ",
+              "requestInterval": 1000
+            }
+          }
+        }
+      },
+      "id": "66313ca4-633d-4f4e-ba66-470e124c412d",
+      "name": "Get Comments List",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        688,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.regulations.gov/v4/comments/{{ $json.csvList }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "=laoV9AqkfgctjBUb9LLY9rzVN2vEZV4LadnnLKdE"
+            },
+            {
+              "name": "include",
+              "value": "attachments"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 10
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "981b4308-f9ea-4218-8ff0-7d1c53c504a9",
+      "name": "Get Individual Comment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1232,
+        544
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "5871b199-e5f3-47e3-ab4e-ca2fc30e1f12",
+      "name": "When clicking \"Test workflow\"",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        48,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        848,
+        544
+      ],
+      "id": "cbd846ff-0df9-4aa4-b8cd-1a87f244611e",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "include": "selected",
+        "includeFields": "id",
+        "options": {}
+      },
+      "id": "a20fa939-09e7-49c1-93e6-23433852daed",
+      "name": "Extract Object ID1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2,
+      "position": [
+        1040,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Docket Summary: {{ $('HTML').item.json.SUM }}\n\nComment: {{ $json.comment }}\n\nComment ID: {{ $json.comment_id }}\n\nDocket ID: {{ $json.docket_id }}\n\n\n\n\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a government worker tasked to read comments on bills. You will be provided the docker that is being commented on and a comment. When you read the comment you will analyze it for the following things.\n\n1. Sentiment. Is this positive or negative? -10 means that it is incredibly negative and angry where +10 means that it is going to be optimistic and happy. 0 means that the comment has a neutral tone.\n\n2. Relevance. I want you to compare the comment against the docket and identify how relevant it is. 0 means that there is no relevance where 10 means that this is very specific to this exact docket.\n\n3. Summarize. I want you to give me a summary of the comment. If the comment is short keep the summary short, if the comment is long you can give a longer summary but lets keep it under 100 words.\n\n4. Stakeholder Type. I want you to look through the comment and try and identify who the commenter is. Are they someone affected by the bill, are they someone in a particular district, etc...\n\n5. Cons. Did the user mention any concerns or problems that they have with the regulation? Summarize those concerns or problems. If there are no concerns or problems, leave this blank.\n\n6. Pros. Did the comment speak positively about the regulation. Summarize what they view positively. If they have nothing positive leave this blank.\n\nWhen you give your response, only create a json that includes your analysis value, your analysis, the Comment ID, Docket ID, and the actual comment. Your response should look like this\n\nIMPORTANT: DO NOT ADD ANY TEXT OUTSIDE THE JSON. We do not need markdown, ONLY THE JSON\n\n{\"Sentiment\": 0,\n\"Sentiment Analysis\": \"The sentiment analysis is...\",\n\"Relevance\": 8,\n\"Relevance Analysis\": \"The comment is highly relevant as it...\",\n\"Summary\": \"The commenter raises questions about the necessity of reporting data for CHIP-eligible students and non-participating LEAs, the requirement for parental consent for IEP ratios, and the alignment of student count data timing with report timing.\",\n\"Stakeholder Type\": \"State education agency representative or someone involved in the state's school health services program.\",\n\"comment_id\": \"CMS-2024-0331-0005\",\n\"docket_id\": \"CMS-2024-0331-0001\",\n\"comment_text\": \"Original comment text\",\n\"cons\": \"Concerns with the regulation\",\n\"pros\": \"positive points about the regulation\"\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        656,
+        1088
+      ],
+      "id": "b8fb4bef-2750-4ab7-af97-a314144d2a1e",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "content": "## Get all comments for a Docket\n",
+        "height": 400,
+        "width": 1856,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        592,
+        416
+      ],
+      "id": "a2ff513e-ab1b-43a8-a5a1-5dc6a5ac27aa",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Test Fire\nUses CMS-2024-0331-0001 as it's test docket since it has 4 comments\n",
+        "height": 288,
+        "width": 432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "db1b663c-b09f-4e13-aaa0-191727f11d4b",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Get the Document Summary for relevance analysis",
+        "height": 304,
+        "width": 1456,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        592,
+        32
+      ],
+      "id": "afdca3ff-0510-4c59-bf35-8b54fe7a1dd3",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Process the comments\nWe use this step to create the general information for a comment. This includes us generating the relevance to the docket, the sentiment (is it positive/negative), and a general summary of the comment",
+        "height": 448,
+        "width": 416,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        608,
+        928
+      ],
+      "id": "23ad00e3-fc70-48a1-9024-3103d7b13d1f",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Store this batch of comments\n",
+        "height": 448,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1056,
+        928
+      ],
+      "id": "8508dbe3-01bb-45e5-a042-d226e2b1ec13",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "07a25f9a-679d-466c-9d1e-683d692d4474",
+              "leftValue": "={{ $json.included[0].attributes.fileFormats[0].fileUrl }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1424,
+        544
+      ],
+      "id": "a463a1e8-136a-4a66-9b61-6c2bc2872694",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "try {\n  item = $json.output.includes('```json')\n    ? JSON.parse($json.output.replace(/^```json\\s*/, '').replace(/\\s*```$/, ''))\n    : JSON.parse($json.output);\n} catch (e) {\n  item = null; // or handle the error as needed\n}\nreturn item;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        1088
+      ],
+      "id": "17cd55c6-775a-4513-8dc2-b3c83ef4cff7",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "content": "## Create db\nWill also delete current DB.",
+        "height": 416,
+        "width": 624
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -656,
+        0
+      ],
+      "id": "e988f037-4804-4422-b320-962a9869489a",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "comment_storage",
+          "mode": "list",
+          "cachedResultName": "comment_storage"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "comment_id": "={{ $json.comment_id }}",
+            "docket_id": "={{ $json.docket_id }}",
+            "sentiment": "={{ $json.Sentiment }}",
+            "relevance": "={{ $json.Relevance }}",
+            "summary": "={{ $json.Summary }}",
+            "comment_text": "={{ $json.comment_text }}",
+            "novelty": 0,
+            "commenter_type": "={{ $json['Stakeholder Type'] }}"
+          },
+          "matchingColumns": [
+            "comment_id"
+          ],
+          "schema": [
+            {
+              "id": "comment_id",
+              "displayName": "comment_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "docket_id",
+              "displayName": "docket_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "tag",
+              "displayName": "tag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "relevance",
+              "displayName": "relevance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "commenter_type",
+              "displayName": "commenter_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "comment_text",
+              "displayName": "comment_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "novelty",
+              "displayName": "novelty",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1280,
+        992
+      ],
+      "id": "eac766f6-492d-4a4f-9e38-c21d9d431458",
+      "name": "Store Comments",
+      "credentials": {
+        "postgres": {
+          "id": "xwrcgI8PqTKN17LU",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "docket_storage",
+          "mode": "list",
+          "cachedResultName": "docket_storage"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "docket_id": "={{ $json.docket_id }}",
+            "docket_summary": "={{ $json.Summary }}"
+          },
+          "matchingColumns": [
+            "docket_id"
+          ],
+          "schema": [
+            {
+              "id": "docket_id",
+              "displayName": "docket_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "docket_summary",
+              "displayName": "docket_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1280,
+        1200
+      ],
+      "id": "1ec56560-f46e-43a0-a04c-e4a4cbd405ed",
+      "name": "Store Docket",
+      "credentials": {
+        "postgres": {
+          "id": "xwrcgI8PqTKN17LU",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "content": "## Determine Novelty",
+        "height": 448,
+        "width": 1552,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        608,
+        1424
+      ],
+      "id": "bf4b925b-def7-4143-b98b-aacf4225aba6",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "dataPropertyName": "data.attributes.content",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "SUM",
+              "cssSelector": ".SUM"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        1712,
+        160
+      ],
+      "id": "0b5cbae9-4bdb-460b-983b-74703a068e50",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.regulations.gov/v4/federal-register-documents/{{ $json.data.attributes.frDocNum }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "=laoV9AqkfgctjBUb9LLY9rzVN2vEZV4LadnnLKdE"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "5fd65892-0bb3-4957-a582-4fed8725e6e5",
+      "name": "Get RAW Summary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1280,
+        160
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.regulations.gov/v4/comments/EPA-HQ-OAR-2025-0194-0106",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "=laoV9AqkfgctjBUb9LLY9rzVN2vEZV4LadnnLKdE"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "81adb4b2-806e-47d8-9bc6-2ba2555bba58",
+      "name": "Get Individual Comment1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        128,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DROP TABLE docket_storage;\n\nCREATE TABLE docket_storage (\n  docket_id TEXT PRIMARY KEY,\n  docket_summary TEXT,\n  docket_title TEXT,\n  created_at TIMESTAMP,\n  objectid TEXT\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -608,
+        128
+      ],
+      "id": "2b383876-63f9-4076-8f68-d6ac91ba2cf2",
+      "name": "Create DB Schema",
+      "credentials": {
+        "postgres": {
+          "id": "xwrcgI8PqTKN17LU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DROP TABLE comment_storage;\n\nCREATE TABLE comment_storage (\n  comment_id TEXT PRIMARY KEY,\n  docket_id TEXT,\n  sentiment INT,\n  tag TEXT,\n  relevance INT,\n  summary TEXT,\n  commenter_type TEXT,\n  comment_text TEXT,\n  novelty INT\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -400,
+        128
+      ],
+      "id": "ee0d6a5b-6c82-49e1-9039-328426169149",
+      "name": "Create Comment Table",
+      "credentials": {
+        "postgres": {
+          "id": "xwrcgI8PqTKN17LU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Aggregated Comment: {{ $json.string_agg }}\n\nComment: {{ $json.comment_text }}\n\nComment ID: {{ $json.comment_id }}",
+        "options": {
+          "systemMessage": "You are a government worker tasked to read comments on bills. You will be provided the docker that is being commented on and a comment. When you read the comment you will analyze it for the following things.\n\n1. Novelty. we are going to see how novel a comment is. We want it to show up only once in the aggregated comment. if it only shows up once then it is moderately novel. If it has a high level of delta from each other comment and has unique input and insight then it is very novel. If it shows repeatedly with only minimal changes then it isn't novel. Rank the novelty between 0 and 10, 10 being highly novel, 0 being a comment that is constantly there.\n\nIMPORTANT: DO NOT ADD ANY TEXT OUTSIDE THE JSON. We do not need markdown, ONLY THE JSON\n\n\"Novelty\": \n0,\n\"Novelty Analysis\": \n\"The sentiment analysis is...\",\n\"comment_id\": \n\"CMS-2024-0331-0005\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1312,
+        1520
+      ],
+      "id": "7802a6f7-51ee-4d69-b7f4-df68cee34257",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "us.amazon.nova-2-lite-v1:0",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAwsBedrock",
+      "typeVersion": 1.1,
+      "position": [
+        1312,
+        1712
+      ],
+      "id": "cf84c5a3-80f6-4f7e-9efa-88412f8d7528",
+      "name": "AWS Bedrock Chat Model",
+      "credentials": {
+        "aws": {
+          "id": "syiXXJzqwfMyXAbT",
+          "name": "AWS (IAM) account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT DISTINCT docket_id\nFROM comment_storage\nORDER BY docket_id;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        640,
+        1664
+      ],
+      "id": "913f726b-b362-43de-b129-269ce96e3b18",
+      "name": "Pull List of Dockets",
+      "credentials": {
+        "postgres": {
+          "id": "xwrcgI8PqTKN17LU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT STRING_AGG(comment_id || ': ' || comment_text, ' ')\nFROM comment_storage\nWHERE docket_id = '{{ $json.docket_id }}';",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        832,
+        1504
+      ],
+      "id": "737561b2-a6d1-449f-a064-5b3e556c993a",
+      "name": "Get concatenated comment string",
+      "credentials": {
+        "postgres": {
+          "id": "xwrcgI8PqTKN17LU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT comment_id, comment_text\nFROM comment_storage\nWHERE docket_id = '{{ $json.docket_id }}';",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        832,
+        1680
+      ],
+      "id": "ede46b33-6d0a-4496-afc4-32c56e3b566a",
+      "name": "Get All Comments",
+      "credentials": {
+        "postgres": {
+          "id": "xwrcgI8PqTKN17LU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1088,
+        1520
+      ],
+      "id": "c2c1766a-e311-4e7f-9533-79ffb18ad913",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "comment_storage",
+          "mode": "list",
+          "cachedResultName": "comment_storage"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "novelty": "={{ $json.Novelty }}",
+            "comment_id": "={{ $json.comment_id }}"
+          },
+          "matchingColumns": [
+            "comment_id"
+          ],
+          "schema": [
+            {
+              "id": "comment_id",
+              "displayName": "comment_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "docket_id",
+              "displayName": "docket_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "tag",
+              "displayName": "tag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "relevance",
+              "displayName": "relevance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "commenter_type",
+              "displayName": "commenter_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "comment_text",
+              "displayName": "comment_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "novelty",
+              "displayName": "novelty",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1888,
+        1520
+      ],
+      "id": "44ae10f8-f974-4690-b4e2-0dad12e55274",
+      "name": "Store Comments1",
+      "credentials": {
+        "postgres": {
+          "id": "xwrcgI8PqTKN17LU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "//item = JSON.parse($json.output);\nitem = JSON.parse($json.output.replace(/^```json\\s*/, '').replace(/\\s*```$/, ''));\nreturn item;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1664,
+        1520
+      ],
+      "id": "7cc1ce04-dc63-4708-9de5-941ab27a966f",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.regulations.gov/v4/documents",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "=laoV9AqkfgctjBUb9LLY9rzVN2vEZV4LadnnLKdE"
+            },
+            {
+              "name": "filter[documentType]",
+              "value": "Proposed Rule"
+            },
+            {
+              "name": "filter[docketId]",
+              "value": "={{ $json.docket_id }}"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 500
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "f18b04b0-20ea-4518-854a-428beb66abb9",
+      "name": "Get Docket Details",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        832,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.regulations.gov/v4/dockets",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "=laoV9AqkfgctjBUb9LLY9rzVN2vEZV4LadnnLKdE"
+            },
+            {
+              "name": "filter[lastModifiedDate][ge]",
+              "value": "={{ $now.minus({days: 1}).toFormat('yyyy-MM-dd hh:mm:ss') }}"
+            },
+            {
+              "name": "filter[lastModifiedDate][le]",
+              "value": "={{ $now.toFormat('yyyy-MM-dd hh:mm:ss') }}"
+            },
+            {
+              "name": "page[size]",
+              "value": "250"
+            },
+            {
+              "name": "filter[docketType]",
+              "value": "Rulemaking"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {
+                    "name": "page[number]",
+                    "value": "={{ $pageCount +1}}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ !$response.body.meta.hasNextPage }} "
+            }
+          }
+        }
+      },
+      "id": "ece73deb-6513-4a44-99d6-6dd254102d2b",
+      "name": "Get Today's Dockets",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        656,
+        -224
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        880,
+        -224
+      ],
+      "id": "895fe239-9409-4420-8af6-e0d54b3836b4",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "model": "mistral.magistral-small-2509",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAwsBedrock",
+      "typeVersion": 1.1,
+      "position": [
+        656,
+        1248
+      ],
+      "id": "a4b11c6d-f3a7-487d-b002-8bedb788b24b",
+      "name": "AWS Bedrock Chat Model1",
+      "credentials": {
+        "aws": {
+          "id": "syiXXJzqwfMyXAbT",
+          "name": "AWS (IAM) account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "We need to add in audit log functionality that tracks everything that we do. We want to highlight our ability t add in a human in the loop element",
+        "width": 288
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2080,
+        1072
+      ],
+      "id": "94f186e2-0d6d-4c4b-b465-7eb8308569fd",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "\nALTER TABLE docket_storage\nADD COLUMN docket_sentiment TEXT;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -288,
+        240
+      ],
+      "id": "d6c13341-6497-40bc-8f79-8153f112413f",
+      "name": "Create Comment Table1",
+      "credentials": {
+        "postgres": {
+          "id": "xwrcgI8PqTKN17LU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "docket_storage",
+          "mode": "list",
+          "cachedResultName": "docket_storage"
+        },
+        "limit": 10,
+        "where": {
+          "values": [
+            {
+              "column": "created_at",
+              "condition": ">=",
+              "value": "={{ $now.minus({hours: 24}).toISO() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        592,
+        160
+      ],
+      "id": "ea04a5bb-1b81-4c75-943e-91c2c9d2b3bd",
+      "name": "Get Today's Dockets1",
+      "credentials": {
+        "postgres": {
+          "id": "xwrcgI8PqTKN17LU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        976,
+        160
+      ],
+      "id": "ee349b71-de0e-49ad-8307-5107b74e6eac",
+      "name": "Split Out2"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.regulations.gov/v4/documents/{{ $json.id }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "=laoV9AqkfgctjBUb9LLY9rzVN2vEZV4LadnnLKdE"
+            },
+            {
+              "name": "filter[documentType]",
+              "value": "Proposed Rule"
+            },
+            {
+              "name": "filter[docketId]",
+              "value": "={{ $json.docket_id }}"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 500
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "d575ef43-b142-4f9e-ace3-02dd6cac5e35",
+      "name": "Get Docket Details1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1120,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "docket_storage",
+          "mode": "list",
+          "cachedResultName": "docket_storage"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "docket_id": "={{ $json.id }}",
+            "docket_title": "={{ $json.attributes.title }}",
+            "created_at": "={{ $json.attributes.lastModifiedDate }}",
+            "objectid": "={{ $json.attributes.objectId }}"
+          },
+          "matchingColumns": [
+            "docket_id"
+          ],
+          "schema": [
+            {
+              "id": "docket_id",
+              "displayName": "docket_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "docket_summary",
+              "displayName": "docket_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "docket_title",
+              "displayName": "docket_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "objectid",
+              "displayName": "objectid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1056,
+        -224
+      ],
+      "id": "b88deed1-112c-4579-9248-d95b6d1cac07",
+      "name": "Store Today's Docket",
+      "credentials": {
+        "postgres": {
+          "id": "xwrcgI8PqTKN17LU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.included[0].attributes.fileFormats[0].fileUrl }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1664,
+        608
+      ],
+      "id": "c724a5ec-a028-4977-9319-e526349f1bfb",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1872,
+        608
+      ],
+      "id": "5a162e55-324c-4c6e-90dd-c9463112d6a0",
+      "name": "Extract from File",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {\n  json: {\n    docket_summary: $('HTML').item.json.SUM,\n    comment: $json.text,\n    comment_id: $('HTTP Request').item.json.data.id,\n    docket_id: $('Get Docket Details1').item.json.data.id\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2112,
+        560
+      ],
+      "id": "b100e456-b6a0-4005-a48d-41ca559d3c31",
+      "name": "PDF Parse"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {\n  json: {\n    docket_summary: $('HTML').item.json.SUM,\n    comment: $json.data.attributes.comment,\n    comment_id: $json.data.id,\n    docket_id: $('Get Docket Details1').item.json.data.id\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1664,
+        464
+      ],
+      "id": "f5447635-453a-40c2-ac01-e0f8963f2c0d",
+      "name": "HTM Parse"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "07a25f9a-679d-466c-9d1e-683d692d4474",
+              "leftValue": "={{ $json.data.attributes.content }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1424,
+        160
+      ],
+      "id": "60703b3b-5226-40fb-8661-5cbd75da31bd",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// this is mocking data returned from \n// an api with a list customers\nreturn {\n  // \"docket_id\":\"EPA-HQ-OAR-2025-0194-0093\"\n  // \"docket_id\":\"FAA-2018-1084\"\n  // \"docket_id\": \"CMS-2022-0109\"\n  \"docket_id\": \"CMS-2022-0109-0002\"\n};"
+      },
+      "id": "77b6dfd5-4188-474e-9db1-ffc3daf49837",
+      "name": "mock data1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        1504
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Send to service now",
+        "height": 496,
+        "width": 704
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2320,
+        1408
+      ],
+      "id": "4ebac6f7-4783-4b75-9def-1b29958d87ef",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://skysolutionsllcdemo3.service-now.com/api/x_sks_comment_rw/cms_comments_import/ingest",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "Sentiment",
+              "value": "={{ $json.sentiment }}"
+            },
+            {
+              "name": "Relevance",
+              "value": "={{ $json.relevance }}"
+            },
+            {
+              "name": "Relevance Analysis"
+            },
+            {
+              "name": "summary",
+              "value": "={{ $json.summary }}"
+            },
+            {
+              "name": "Stakeholder Type",
+              "value": "={{ $json.commenter_type }}"
+            },
+            {
+              "name": "Stakeholder Analysis"
+            },
+            {
+              "name": "comment_id",
+              "value": "={{ $json.comment_id }}"
+            },
+            {
+              "name": "docket_id",
+              "value": "={{ $json.docket_id }}"
+            },
+            {
+              "name": "comment_text",
+              "value": "={{ $json.comment_text }}"
+            },
+            {
+              "name": "novelty",
+              "value": "={{ $json.novelty }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2576,
+        1488
+      ],
+      "id": "6d8f813b-0d6a-4168-84fb-0c73074a2577",
+      "name": "Send Comments to Servicenow",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "OHVkd6jnbl6URIXV",
+          "name": "cmscomments"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT *\nFROM comment_storage\norder by comment_id\nlimit 50;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2368,
+        1488
+      ],
+      "id": "e1e8924b-2efa-4b16-907d-9b60e01a2c4e",
+      "name": "Get All Comments for Service Now",
+      "credentials": {
+        "postgres": {
+          "id": "xwrcgI8PqTKN17LU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Determine Docket Sentiment",
+        "height": 448,
+        "width": 1552,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        608,
+        1920
+      ],
+      "id": "2ca24174-a7aa-459c-a980-c5596f8a12b7",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Aggregated Comment: {{ $json.string_agg }}\n\nComment: {{ $json.docket_id }}\n\ndocket Summary: {{ $json.docket_summary }}",
+        "options": {
+          "systemMessage": "You are a government worker tasked to read comments on bills. You are going to read the docket summary and the aggregation of all the comments. I want you to read the comments and come up with a general feeling of the docket. I want you to phrase it as such:\n\n\"People primarily like/dislike the proposal, they like {List of items they like}. Their complaints are {list of complaints}. The ideal outcome of this regulation for them is {what the commenters want out of this regulation}\n\nDo not use any markdown."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1312,
+        2016
+      ],
+      "id": "4443d9b1-47bf-424c-ad67-8135466dc5d2",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "model": "us.amazon.nova-2-lite-v1:0",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAwsBedrock",
+      "typeVersion": 1.1,
+      "position": [
+        1312,
+        2208
+      ],
+      "id": "ac1f2bc5-9bbb-4e24-aee5-4131a6264689",
+      "name": "AWS Bedrock Chat Model2",
+      "credentials": {
+        "aws": {
+          "id": "syiXXJzqwfMyXAbT",
+          "name": "AWS (IAM) account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT DISTINCT docket_id\nFROM comment_storage\nORDER BY docket_id;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        640,
+        2160
+      ],
+      "id": "2e60b38a-55e3-4d6b-bb14-6c4a14adbc4a",
+      "name": "Pull List of Dockets1",
+      "credentials": {
+        "postgres": {
+          "id": "xwrcgI8PqTKN17LU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT STRING_AGG(comment_id || ': ' || comment_text, ' ')\nFROM comment_storage\nWHERE docket_id = '{{ $json.docket_id }}';",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        832,
+        2000
+      ],
+      "id": "507349af-43c9-4d09-a52d-8aacbaf291d9",
+      "name": "Get concatenated comment string1",
+      "credentials": {
+        "postgres": {
+          "id": "xwrcgI8PqTKN17LU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1088,
+        2016
+      ],
+      "id": "10d323bc-9fe4-4e1f-b2df-c568361d44da",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// this is mocking data returned from \n// an api with a list customers\nreturn {\n  // \"docket_id\":\"EPA-HQ-OAR-2025-0194-0093\"\n  // \"docket_id\":\"FAA-2018-1084\"\n  // \"docket_id\": \"CMS-2022-0109\"\n  \"docket_id\": \"CMS-2022-0109-0002\"\n};"
+      },
+      "id": "3506d281-683e-4da7-9294-08fe2ac46b4d",
+      "name": "mock data2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        1968
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT docket_id, docket_summary\nFROM docket_storage\nWHERE docket_id = '{{ $json.docket_id }}';",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        816,
+        2208
+      ],
+      "id": "11f44208-015a-43a2-8b08-7d3ae57486f6",
+      "name": "Docket Information",
+      "credentials": {
+        "postgres": {
+          "id": "xwrcgI8PqTKN17LU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "docket_storage",
+          "mode": "list",
+          "cachedResultName": "docket_storage"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "docket_summary": "=",
+            "docket_id": "={{ $('Merge1').item.json.docket_id }}",
+            "docket_sentiment": "={{ $json.output }}"
+          },
+          "matchingColumns": [
+            "docket_id"
+          ],
+          "schema": [
+            {
+              "id": "docket_id",
+              "displayName": "docket_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "docket_summary",
+              "displayName": "docket_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "docket_title",
+              "displayName": "docket_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "objectid",
+              "displayName": "objectid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "docket_sentiment",
+              "displayName": "docket_sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1888,
+        2016
+      ],
+      "id": "f34bfa2b-341c-49b0-a4af-a87862c152f3",
+      "name": "Store Docket Opinion",
+      "credentials": {
+        "postgres": {
+          "id": "xwrcgI8PqTKN17LU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT *\nFROM docket_storage\norder by docket_id;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2368,
+        1680
+      ],
+      "id": "194d7efc-101b-4c9e-a9f0-0d2941f3e8eb",
+      "name": "Get All Dockets for Service Now",
+      "credentials": {
+        "postgres": {
+          "id": "xwrcgI8PqTKN17LU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// this is mocking data returned from \n// an api with a list customers\nreturn {\n  // \"docket_id\":\"EPA-HQ-OAR-2025-0194-0093\"\n  // \"docket_id\":\"FAA-2018-1084\"\n  \"docket_id\": \"CMS-2022-0109\"\n  // \"docket_id\": \"CMS-2022-0109-0002\"\n};"
+      },
+      "id": "db44d2ed-e7a4-4dd6-9a16-a7a8ad8dd118",
+      "name": "mock data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://skysolutionsllcdemo3.service-now.com/api/x_sks_comment_rw/cms_docket/post",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "docket_id",
+              "value": "={{ $json.docket_id }}"
+            },
+            {
+              "name": "docket_summary",
+              "value": "={{ $json.docket_summary }}"
+            },
+            {
+              "name": "docket_sentiment",
+              "value": "={{ $json.docket_sentiment }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2576,
+        1680
+      ],
+      "id": "d1202004-4e65-4c59-b9ba-1edd1422f762",
+      "name": "Send Dockets to Servicenow",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "OHVkd6jnbl6URIXV",
+          "name": "cmscomments"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "docket_storage",
+          "mode": "list",
+          "cachedResultName": "docket_storage"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "docket_id": "={{ $('Get Docket Details1').item.json.data.id }}",
+            "docket_summary": "={{ $json.SUM }}"
+          },
+          "matchingColumns": [
+            "docket_id"
+          ],
+          "schema": [
+            {
+              "id": "docket_id",
+              "displayName": "docket_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "docket_summary",
+              "displayName": "docket_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2240,
+        96
+      ],
+      "id": "ad3549d4-7698-4ff6-b6b0-d8375bda4ebc",
+      "name": "Store Docket1",
+      "credentials": {
+        "postgres": {
+          "id": "xwrcgI8PqTKN17LU",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get Comments List": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking \"Test workflow\"": {
+      "main": [
+        [
+          {
+            "node": "Get Today's Dockets1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Extract Object ID1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Object ID1": {
+      "main": [
+        [
+          {
+            "node": "Get Individual Comment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Individual Comment": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTM Parse",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Store Comments",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Store Docket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Comments": {
+      "main": [
+        []
+      ]
+    },
+    "Get RAW Summary": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Store Docket1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Comments List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Docket": {
+      "main": [
+        []
+      ]
+    },
+    "Create DB Schema": {
+      "main": [
+        [
+          {
+            "node": "Create Comment Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AWS Bedrock Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull List of Dockets": {
+      "main": [
+        [
+          {
+            "node": "Get concatenated comment string",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get All Comments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get concatenated comment string": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Comments": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Store Comments1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Docket Details": {
+      "main": [
+        [
+          {
+            "node": "Split Out2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Today's Dockets": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Store Today's Docket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AWS Bedrock Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Today's Dockets1": {
+      "main": [
+        [
+          {
+            "node": "Get Docket Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out2": {
+      "main": [
+        [
+          {
+            "node": "Get Docket Details1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Docket Details1": {
+      "main": [
+        [
+          {
+            "node": "Get RAW Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "PDF Parse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDF Parse": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTM Parse": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mock data1": {
+      "main": [
+        []
+      ]
+    },
+    "Get All Comments for Service Now": {
+      "main": [
+        [
+          {
+            "node": "Send Comments to Servicenow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Store Docket Opinion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AWS Bedrock Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull List of Dockets1": {
+      "main": [
+        [
+          {
+            "node": "Get concatenated comment string1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Docket Information",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get concatenated comment string1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mock data2": {
+      "main": [
+        []
+      ]
+    },
+    "Docket Information": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get All Dockets for Service Now": {
+      "main": [
+        [
+          {
+            "node": "Send Dockets to Servicenow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mock data": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "68210e7f-3ba3-40ba-83c6-96babfc8f650",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "089593b0375f52cffd2e682594e43cdd96459883230a04bef809490471c267bb"
+  },
+  "id": "UmlRZK6UxrEBIi94",
+  "tags": []
+}

@@ -13,11 +13,11 @@
             },
             {
               "name": "api_key",
-              "value": "=laoV9AqkfgctjBUb9LLY9rzVN2vEZV4LadnnLKdE"
+              "value": ""
             },
             {
               "name": "page[size]",
-              "value": "=250"
+              "value": "=100"
             },
             {
               "name": "include",
@@ -65,7 +65,7 @@
           "parameters": [
             {
               "name": "api_key",
-              "value": "=laoV9AqkfgctjBUb9LLY9rzVN2vEZV4LadnnLKdE"
+              "value": ""
             },
             {
               "name": "include",
@@ -93,7 +93,8 @@
       "position": [
         1232,
         544
-      ]
+      ],
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {},
@@ -102,23 +103,9 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        48,
-        112
+        160,
+        128
       ]
-    },
-    {
-      "parameters": {
-        "fieldToSplitOut": "data",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.splitOut",
-      "typeVersion": 1,
-      "position": [
-        848,
-        544
-      ],
-      "id": "cbd846ff-0df9-4aa4-b8cd-1a87f244611e",
-      "name": "Split Out"
     },
     {
       "parameters": {
@@ -155,7 +142,7 @@
     },
     {
       "parameters": {
-        "content": "## Get all comments for a Docket\n",
+        "content": "## Get all comments for a Docket\nNow that we have the docket information we now move on to getting the comments associated with the docket",
         "height": 400,
         "width": 1856,
         "color": 6
@@ -171,24 +158,24 @@
     },
     {
       "parameters": {
-        "content": "## Test Fire\nUses CMS-2024-0331-0001 as it's test docket since it has 4 comments\n",
-        "height": 288,
+        "content": "## Test Fire\n\n",
+        "height": 304,
         "width": 432
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        0,
-        0
+        32,
+        32
       ],
       "id": "db1b663c-b09f-4e13-aaa0-191727f11d4b",
       "name": "Sticky Note1"
     },
     {
       "parameters": {
-        "content": "## Get the Document Summary for relevance analysis",
+        "content": "## Get the Document Summary for relevance analysis\nWe start by pulling in the document summaries from regulations.gov. This is to give more context to what the docket is. We also store the raw information for the docket in case of any interruptions later.",
         "height": 304,
-        "width": 1456,
+        "width": 1664,
         "color": 3
       },
       "type": "n8n-nodes-base.stickyNote",
@@ -259,8 +246,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1424,
-        544
+        1472,
+        528
       ],
       "id": "a463a1e8-136a-4a66-9b61-6c2bc2872694",
       "name": "If"
@@ -496,7 +483,7 @@
     },
     {
       "parameters": {
-        "content": "## Determine Novelty",
+        "content": "## Determine Novelty\nWe compare comments versus a batch of them to identify how novel they are. Our current data sets were small enough to allow us to compare the entire body of comments against the individual comment",
         "height": 448,
         "width": 1552,
         "color": 6
@@ -527,8 +514,8 @@
       "type": "n8n-nodes-base.html",
       "typeVersion": 1.2,
       "position": [
-        1712,
-        160
+        1760,
+        112
       ],
       "id": "0b5cbae9-4bdb-460b-983b-74703a068e50",
       "name": "HTML"
@@ -541,7 +528,7 @@
           "parameters": [
             {
               "name": "api_key",
-              "value": "=laoV9AqkfgctjBUb9LLY9rzVN2vEZV4LadnnLKdE"
+              "value": ""
             }
           ]
         },
@@ -559,8 +546,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        1280,
-        160
+        1360,
+        128
       ],
       "onError": "continueRegularOutput"
     },
@@ -572,7 +559,7 @@
           "parameters": [
             {
               "name": "api_key",
-              "value": "=laoV9AqkfgctjBUb9LLY9rzVN2vEZV4LadnnLKdE"
+              "value": ""
             }
           ]
         },
@@ -603,7 +590,7 @@
       "typeVersion": 2.6,
       "position": [
         -608,
-        128
+        96
       ],
       "id": "2b383876-63f9-4076-8f68-d6ac91ba2cf2",
       "name": "Create DB Schema",
@@ -624,7 +611,7 @@
       "typeVersion": 2.6,
       "position": [
         -400,
-        128
+        96
       ],
       "id": "ee0d6a5b-6c82-49e1-9039-328426169149",
       "name": "Create Comment Table",
@@ -906,7 +893,7 @@
           "parameters": [
             {
               "name": "api_key",
-              "value": "=laoV9AqkfgctjBUb9LLY9rzVN2vEZV4LadnnLKdE"
+              "value": ""
             },
             {
               "name": "filter[documentType]",
@@ -937,7 +924,7 @@
       "typeVersion": 4.1,
       "position": [
         832,
-        160
+        128
       ]
     },
     {
@@ -948,7 +935,7 @@
           "parameters": [
             {
               "name": "api_key",
-              "value": "=laoV9AqkfgctjBUb9LLY9rzVN2vEZV4LadnnLKdE"
+              "value": ""
             },
             {
               "name": "filter[lastModifiedDate][ge]",
@@ -1050,14 +1037,14 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "\nALTER TABLE docket_storage\nADD COLUMN docket_sentiment TEXT;",
+        "query": "UPDATE comment_storage\nSET docket_id = 'CMS-2022-0109'\nWHERE docket_id LIKE '%CMS-2022-0109%';",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -288,
-        240
+        -608,
+        272
       ],
       "id": "d6c13341-6497-40bc-8f79-8153f112413f",
       "name": "Create Comment Table1",
@@ -1082,7 +1069,7 @@
           "mode": "list",
           "cachedResultName": "docket_storage"
         },
-        "limit": 10,
+        "limit": 1,
         "where": {
           "values": [
             {
@@ -1097,8 +1084,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        592,
-        160
+        640,
+        128
       ],
       "id": "ea04a5bb-1b81-4c75-943e-91c2c9d2b3bd",
       "name": "Get Today's Dockets1",
@@ -1117,8 +1104,8 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        976,
-        160
+        1008,
+        128
       ],
       "id": "ee349b71-de0e-49ad-8307-5107b74e6eac",
       "name": "Split Out2"
@@ -1131,7 +1118,7 @@
           "parameters": [
             {
               "name": "api_key",
-              "value": "=laoV9AqkfgctjBUb9LLY9rzVN2vEZV4LadnnLKdE"
+              "value": ""
             },
             {
               "name": "filter[documentType]",
@@ -1161,8 +1148,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        1120,
-        160
+        1184,
+        128
       ]
     },
     {
@@ -1303,7 +1290,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "return {\n  json: {\n    docket_summary: $('HTML').item.json.SUM,\n    comment: $json.text,\n    comment_id: $('HTTP Request').item.json.data.id,\n    docket_id: $('Get Docket Details1').item.json.data.id\n  }\n};"
+        "jsCode": "return {\n  json: {\n    docket_summary: $('HTML').item.json.SUM,\n    comment: $json.text,\n    comment_id: $('HTTP Request').item.json.data.id,\n    docket_id: $('Get Docket Details1').item.json.data.attributes.docketId\n  }\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -1356,8 +1343,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1424,
-        160
+        1536,
+        128
       ],
       "id": "60703b3b-5226-40fb-8661-5cbd75da31bd",
       "name": "If1"
@@ -1459,7 +1446,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT *\nFROM comment_storage\norder by comment_id\nlimit 50;",
+        "query": "SELECT *\nFROM comment_storage\norder by comment_id\nlimit 1000;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -1479,7 +1466,7 @@
     },
     {
       "parameters": {
-        "content": "## Determine Docket Sentiment",
+        "content": "## Determine Docket Sentiment\nWe now look at all the comments for a particular docket and generalize the sentiment. This generates our docket sentiment report",
         "height": 448,
         "width": 1552,
         "color": 6
@@ -1726,7 +1713,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT *\nFROM docket_storage\norder by docket_id;",
+        "query": "SELECT *\nFROM docket_storage\nWhere docket_sentiment is not null\norder by docket_id;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -1850,8 +1837,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2240,
-        96
+        1968,
+        112
       ],
       "id": "ad3549d4-7698-4ff6-b6b0-d8375bda4ebc",
       "name": "Store Docket1",
@@ -1862,6 +1849,344 @@
         }
       },
       "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        848,
+        544
+      ],
+      "id": "cbd846ff-0df9-4aa4-b8cd-1a87f244611e",
+      "name": "Split Out Comment IDs"
+    },
+    {
+      "parameters": {
+        "content": "## Refresh Docket Summaries\nThis is a debugging function that goes through all dockets that don't have a summary and then populates them ",
+        "height": 304,
+        "width": 1664,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        608,
+        2432
+      ],
+      "id": "8aab34a6-4ddb-4919-98f8-09a2a813ed72",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "dataPropertyName": "data.attributes.content",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "SUM",
+              "cssSelector": ".SUM"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        1776,
+        2512
+      ],
+      "id": "b464ae47-b83b-44eb-96d2-62655364ce14",
+      "name": "HTML1"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.regulations.gov/v4/federal-register-documents/{{ $json.data.attributes.frDocNum }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": ""
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "0fa255cc-34bc-4d24-9bbd-d68a2507e786",
+      "name": "Get RAW Summary1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1376,
+        2528
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.regulations.gov/v4/documents",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": ""
+            },
+            {
+              "name": "filter[documentType]",
+              "value": "Proposed Rule"
+            },
+            {
+              "name": "filter[docketId]",
+              "value": "={{ $json.docket_id }}"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 10
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "df10f161-eae0-464e-b355-d65e75a11d11",
+      "name": "Get Docket Details2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        848,
+        2528
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        2528
+      ],
+      "id": "a0863d8d-b826-40ca-980f-b8a2f2efaed1",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.regulations.gov/v4/documents/{{ $json.id }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": ""
+            },
+            {
+              "name": "filter[documentType]",
+              "value": "Proposed Rule"
+            },
+            {
+              "name": "filter[docketId]",
+              "value": "={{ $json.docket_id }}"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "e228e3fb-8e75-4851-a2ed-18c8aca39682",
+      "name": "Get Docket Details3",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1200,
+        2528
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "07a25f9a-679d-466c-9d1e-683d692d4474",
+              "leftValue": "={{ $json.data.attributes.content }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1552,
+        2528
+      ],
+      "id": "ba491d03-eaae-4c15-8f00-db62b0a08bcb",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "docket_storage",
+          "mode": "list",
+          "cachedResultName": "docket_storage"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "docket_id": "={{ $('Get Docket Details3').item.json.data.id }}",
+            "docket_summary": "={{ $json.SUM }}"
+          },
+          "matchingColumns": [
+            "docket_id"
+          ],
+          "schema": [
+            {
+              "id": "docket_id",
+              "displayName": "docket_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "docket_summary",
+              "displayName": "docket_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1984,
+        2512
+      ],
+      "id": "849c5aef-3c7b-4494-90fd-c41fb255611d",
+      "name": "Store Docket2",
+      "credentials": {
+        "postgres": {
+          "id": "xwrcgI8PqTKN17LU",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "docket_storage",
+          "mode": "list",
+          "cachedResultName": "docket_storage"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "docket_summary",
+              "condition": "IS NULL"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        672,
+        2528
+      ],
+      "id": "69471728-fd99-408d-bf0a-86839c973d35",
+      "name": "Get Dockets Without Summary",
+      "credentials": {
+        "postgres": {
+          "id": "xwrcgI8PqTKN17LU",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Crawl through all new dockets to populate the docket DB\nWe start by pulling the newly updated dockets to prime them to have comments scanned for",
+        "height": 304,
+        "width": 1664,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        592,
+        -320
+      ],
+      "id": "d365d7eb-607e-4286-95e1-d69e5937c24d",
+      "name": "Sticky Note11"
     }
   ],
   "pinData": {},
@@ -1870,7 +2195,7 @@
       "main": [
         [
           {
-            "node": "Split Out",
+            "node": "Split Out Comment IDs",
             "type": "main",
             "index": 0
           }
@@ -1882,17 +2207,6 @@
         [
           {
             "node": "Get Today's Dockets1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Split Out": {
-      "main": [
-        [
-          {
-            "node": "Extract Object ID1",
             "type": "main",
             "index": 0
           }
@@ -2335,6 +2649,94 @@
       "main": [
         []
       ]
+    },
+    "Split Out Comment IDs": {
+      "main": [
+        [
+          {
+            "node": "Extract Object ID1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML1": {
+      "main": [
+        [
+          {
+            "node": "Store Docket2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get RAW Summary1": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Docket Details2": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Get Docket Details3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Docket Details3": {
+      "main": [
+        [
+          {
+            "node": "Get RAW Summary1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "HTML1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Dockets Without Summary": {
+      "main": [
+        [
+          {
+            "node": "Get Docket Details2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -2342,7 +2744,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "68210e7f-3ba3-40ba-83c6-96babfc8f650",
+  "versionId": "dac96c81-663d-4c50-8f83-4bdf37caf638",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "089593b0375f52cffd2e682594e43cdd96459883230a04bef809490471c267bb"

@@ -1483,9 +1483,9 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=Aggregated Comment: {{ $json.string_agg }}\n\nComment: {{ $json.docket_id }}\n\ndocket Summary: {{ $json.docket_summary }}",
+        "text": "=Aggregated Comment: {{ $json.string_agg }}\n\nDocket ID: {{ $json.docket_id }}\n\ndocket Summary: {{ $json.docket_summary }}",
         "options": {
-          "systemMessage": "You are a government worker tasked to read comments on bills. You are going to read the docket summary and the aggregation of all the comments. I want you to read the comments and come up with a general feeling of the docket. I want you to phrase it as such:\n\n\"People primarily like/dislike the proposal, they like {List of items they like}. Their complaints are {list of complaints}. The ideal outcome of this regulation for them is {what the commenters want out of this regulation}\n\nDo not use any markdown."
+          "systemMessage": "You are a government worker tasked to read comments on bills. You are going to read the docket summary and the aggregation of all the comments. I want you to read the comments and come up with a general feeling of the docket we will call this the DOCKET_SENTIMENT. I want you to phrase it as such inside of a json object.\n\n\"People primarily like/dislike the proposal, they like {List of items they like}. Their complaints are {list of complaints}. The ideal outcome of this regulation for them is {what the commenters want out of this regulation}\n\nDo not use any markdown.\n\nThen add the text into a JSON like below\n{\ndocket_sentiment: \"DOCKET_SENTIMENT\",\ndocket_id: \"\"\n}\n\nWhen you print your output, only print the json. Do not wrap the json in any markdown either. YOU MUST INCLUDE BOTH docket_sentiment AND docket_id. A DOCKET ID ALWAYS IS THREE CHARACTERS AND THEN A YEAR AND THEN A FOUR DIGIT NUMBER LIKE CMS-2022-0109"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -1562,7 +1562,7 @@
     {
       "parameters": {
         "mode": "combine",
-        "combineBy": "combineAll",
+        "combineBy": "combineByPosition",
         "options": {}
       },
       "type": "n8n-nodes-base.merge",
@@ -1626,8 +1626,8 @@
           "mappingMode": "defineBelow",
           "value": {
             "docket_summary": "=",
-            "docket_id": "={{ $('Merge1').item.json.docket_id }}",
-            "docket_sentiment": "={{ $json.output }}"
+            "docket_id": "={{ $json.docket_id }}",
+            "docket_sentiment": "={{ $json.docket_sentiment }}"
           },
           "matchingColumns": [
             "docket_id"
@@ -1698,7 +1698,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1888,
+        2000,
         2016
       ],
       "id": "f34bfa2b-341c-49b0-a4af-a87862c152f3",
@@ -2187,6 +2187,20 @@
       ],
       "id": "d365d7eb-607e-4286-95e1-d69e5937c24d",
       "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "//item = JSON.parse($json.output);\nitem = JSON.parse($json.output.replace(/^```json\\s*/, '').replace(/\\s*```$/, ''));\n\n\n\nreturn item;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1680,
+        2016
+      ],
+      "id": "0395552f-2eaa-4a8f-b4ed-c549fb2dbfa9",
+      "name": "Code2"
     }
   ],
   "pinData": {},
@@ -2562,7 +2576,7 @@
       "main": [
         [
           {
-            "node": "Store Docket Opinion",
+            "node": "Code2",
             "type": "main",
             "index": 0
           }
@@ -2737,6 +2751,17 @@
           }
         ]
       ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Store Docket Opinion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -2744,7 +2769,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "dac96c81-663d-4c50-8f83-4bdf37caf638",
+  "versionId": "b01168fb-4d34-4ddd-bada-dbec1fcca7e4",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "089593b0375f52cffd2e682594e43cdd96459883230a04bef809490471c267bb"

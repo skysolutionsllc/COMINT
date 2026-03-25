@@ -96,10 +96,10 @@ Password: dQ}GPMjgq5UFWTdmxQ4{U8KRB2;C)C]
 
 n8n Orchestration Environment
 
-URL: <INSERT_N8N_URL>
+URL: 
 
-Username: <INSERT_USERNAME>
+Username: 
 
-Password: <INSERT_PASSWORD>
+Password: 
 
 n8n is responsible for ingestion, transformation, and pipeline orchestration. All data flows originate here before entering the analytical layer.

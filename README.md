@@ -54,22 +54,11 @@ Sentiment
 Relevance
 Novelty
 
-In parallel, COMINT performs similarity analysis to identify duplicate and near-duplicate submissions. This allows the system to detect coordinated campaigns and quantify their scale without discarding them.
+In parallel, COMINT performs similarity analysis to identify duplicate and near-duplicate submissions. This allows the system to detect coordinated campaigns and quantify their scale without discarding them
 
 All derived attributes are stored alongside the original comment. Nothing is overwritten or abstracted away.
 
-# Comment Impact Scoring
-
-COMINT assigns a Comment Impact Score to each submission.
-
-This is not a black-box metric. The score is constructed from observable factors, including:
-
-Volume of similar arguments
-Presence of legal or economic reasoning
-Thematic relevance to the rule
-Degree of novelty compared to existing submissions
-
-Each score can be decomposed into its contributing components. This ensures that reviewers can understand not just the outcome, but the reasoning behind it.
+The current system is also built in a way where it can be fractured and moved into multiple pipelines allowing for asynchronous execution of the various agents, dramatically speeding up the processing and analysis of data.
 
 # ServiceNow Integration
 
@@ -85,6 +74,11 @@ Analyze sentiment and substantiveness distributions
 
 The interface is designed to support both detailed analyst workflows and high-level executive review. It is also configurable to meet the needs of different agencies or programs.
 
+# Government Usability
+
+This version of the application is built using two FedRAMP approved pieces of software N8N and ServiceNow. While these are the primary engines used for this iteration of the sotware this can be easily shifted thanks to the APIs that this is built with. The entire application can feed any client front end with data and if N8N wanted to be avoided it is a trivial operation to rebuild the application in Python or Go. 
+
+
 # Access Information
 ServiceNow Instance
 
@@ -93,3 +87,7 @@ Instance URL: https://skysolutionsllcdemo3.service-now.com/x/sks/Sky-Assure-COMI
 Username: Regulationcomments
 
 Password: dQ}GPMjgq5UFWTdmxQ4{U8KRB2;C)C]
+
+N8N Instance
+
+Instance URL: http://ec2-34-229-242-191.compute-1.amazonaws.com:5800/workflow/UmlRZK6UxrEBIi94?projectId=PgIH3lzczWV66lkM
